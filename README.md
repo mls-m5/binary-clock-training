@@ -29,8 +29,20 @@ The generated files are `build/podman/index.html`, `index.js`, and
 `index.wasm`. CMake's intermediate files are in `build/podman/cmake/`.
 Podman runs with your user ID so you can delete the build files without root.
 A native CMake build also works, but the exercise page requires Emscripten.
-Run the C++ logic tests with `ctest --test-dir <native-build-dir> --output-on-failure`
-after configuring and building a native CMake build.
+Run the native C++ tests with doctest (CMake downloads the pinned doctest 2.5.3
+GitHub ZIP on first configuration; an internet connection is required):
+
+```sh
+cmake -S . -B build/native -DCMAKE_BUILD_TYPE=Release
+cmake --build build/native
+ctest --test-dir build/native --output-on-failure
+```
+
+The WebAssembly build does not fetch or include doctest. GitHub Actions runs
+the same native tests on pushes and pull requests to `main` via
+[`.github/workflows/native-tests.yml`](.github/workflows/native-tests.yml).
+The Pages workflow builds the WebAssembly site separately; it does not run
+these native tests.
 
 ## Try it online
 
