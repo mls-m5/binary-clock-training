@@ -3,16 +3,15 @@
 
 #include "../src/clock.hpp"
 
-TEST_CASE("invalid bit positions have no group or weight")
-{
+TEST_CASE("invalid bit positions have no group or weight") {
     CHECK(Clock::group(-1) == -1);
     CHECK(Clock::group(16) == -1);
     CHECK(Clock::weight(-1) == 0);
     CHECK(Clock::weight(16) == 0);
 }
 
-TEST_CASE("clock bits decode to a valid time and answers are checked by field")
-{
+TEST_CASE(
+    "clock bits decode to a valid time and answers are checked by field") {
     Clock clock(42);
     for (int round = 0; round < 100; ++round) {
         clock.new_round();

@@ -61,6 +61,15 @@ the same native tests on pushes and pull requests to `main` via
 The Pages workflow builds the WebAssembly site separately; it does not run
 these native tests.
 
+## C++ formatting
+
+After finishing a task, format every tracked C++ source and header file with
+the repository's `.clang-format` before testing or committing:
+
+```sh
+git ls-files -z -- '*.cpp' '*.cc' '*.cxx' '*.h' '*.hpp' | xargs -0 -r clang-format -i
+```
+
 ## Try it online
 
 [Open Binary Clock Training on GitHub Pages](https://mls-m5.github.io/binary-clock-training/).

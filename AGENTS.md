@@ -1,5 +1,11 @@
 # Agent notes
 
+- At the end of every task, before testing or committing, run `clang-format -i`
+  on all tracked C++ source and header files (`.cpp`, `.cc`, `.cxx`, `.h`,
+  `.hpp`) using the repository's `.clang-format`. Check formatting with
+  `clang-format --dry-run --Werror` on those files; do not format generated or
+  fetched dependency files under `build/`.
+
 - This is a C++17 binary-clock exercise compiled with Emscripten to a static
   HTML/JavaScript/WebAssembly site. The clock uses 16 bits in row-major order:
   hours (indices 0–3, range 0–15), minutes (4–9, range 0–59), seconds (10–15,

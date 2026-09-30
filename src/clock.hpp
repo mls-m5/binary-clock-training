@@ -14,7 +14,9 @@ public:
     int check(int hours, int minutes, int seconds);
     bool correct(int group) const;
     bool solved() const;
-    int result() const { return result_; } // -1 = no answer yet; otherwise 3-bit mask
+    int result() const {
+        return result_;
+    } // -1 = no answer yet; otherwise 3-bit mask
 
 private:
     std::mt19937 rng_;
