@@ -11,7 +11,7 @@ if(NOT EMSCRIPTEN)
     )
     FetchContent_MakeAvailable(doctest)
 
-    add_executable(clock-test clock_test.cpp ../src/clock.cpp)
+    add_executable(clock-test clock_test.cpp terminal_test.cpp ../src/clock.cpp ../src/terminal.cpp)
     target_compile_features(clock-test PRIVATE cxx_std_17)
     target_link_libraries(clock-test PRIVATE doctest::doctest)
     add_test(NAME clock-test COMMAND clock-test)

@@ -29,6 +29,11 @@
   manual runs) in the pinned Emscripten container and uploads only
   `build/pages/site/` to GitHub Pages; deployment is not gated on native tests. Keep its Emscripten version aligned with `Containerfile`, and
   keep generated filenames aligned with CMake and README.
-- Native CMake builds compile a small informational executable, not the
-  browser exercise. Prefer checking both the Podman build and the browser page
-  after changes to C++/HTML or the Emscripten configuration.
+- Native CMake builds compile an interactive terminal exercise. `src/terminal.cpp`
+  handles the 4×4 circle-only bit display (`●`/`○`, no labels in the grid) and
+  line input via injected streams; `src/main.cpp`
+  runs it with `std::cin` and `std::cout`. `test/terminal_test.cpp` covers input,
+  hints, success/new rounds and EOF. Run `./build/native/binary-training` and
+  `ctest --test-dir build/native --output-on-failure` after building. Prefer
+  checking both the native and Podman builds after C++ changes, and the browser
+  page after changes to HTML or the Emscripten configuration.

@@ -17,6 +17,10 @@ target_compile_features(
     cxx_std_17
     )
 
+if(NOT EMSCRIPTEN)
+    target_sources(binary-training PRIVATE src/terminal.cpp)
+endif()
+
 if(EMSCRIPTEN)
     # Generate a standalone exercise page alongside the WebAssembly binary.
     set_target_properties(binary-training PROPERTIES

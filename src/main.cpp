@@ -113,10 +113,14 @@ EMSCRIPTEN_KEEPALIVE const char* clock_feedback(int language)
 
 int main() { return 0; }
 #else
+#include "terminal.hpp"
+
 #include <iostream>
+#include <random>
 
 int main()
 {
-    std::cout << "Build with Emscripten to open the binary clock exercise.\n";
+    Clock clock(std::random_device{}());
+    run_terminal(clock, std::cin, std::cout);
 }
 #endif
