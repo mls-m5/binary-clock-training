@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Binärklockan – öva på att läsa bitar</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #101827; color: #f0f5ff; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 2rem 1rem; }
+    main { max-width: 680px; margin: auto; }
+    h1 { margin-bottom: .4rem; }
+    p { line-height: 1.55; color: #cbd6e7; }
+    .note { background: #243149; border-radius: .75rem; padding: .85rem 1rem; }
+    .legend { display: flex; flex-wrap: wrap; gap: .6rem 1.4rem; margin: 1.5rem 0 .75rem; }
+    .legend span { display: inline-flex; align-items: center; gap: .5rem; }
+    .swatch { width: 1rem; height: 1rem; border-radius: .2rem; }
+    .hour { --accent: #fbbf24; }
+    .minute { --accent: #5eead4; }
+    .second { --accent: #c4b5fd; }
+    .swatch { background: var(--accent); }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .55rem; max-width: 480px; }
+    .bit { aspect-ratio: 1; min-height: 64px; border: 2px solid var(--accent); border-radius: .65rem;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: #1a263a; color: #afbbcd; }
+    .bit.on { background: var(--accent); color: #101827; box-shadow: 0 0 18px color-mix(in srgb, var(--accent), transparent 60%); }
+    .bit strong { font-size: clamp(1.2rem, 5vw, 2rem); line-height: 1.1; }
+    .bit small { font-size: .75rem; }
+    form { margin-top: 2rem; }
+    .fields { display: flex; flex-wrap: wrap; gap: .75rem; }
+    label { display: flex; flex-direction: column; gap: .35rem; flex: 1 1 125px; font-weight: 650; }
+    input { width: 100%; padding: .7rem; font: inherit; font-size: 1.15rem; border: 2px solid #718199;
+      border-radius: .5rem; background: #172338; color: white; }
+    input:focus-visible, button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+    input.correct { border-color: #5eead4; }
+    input.incorrect { border-color: #fb7185; }
+    .actions { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.2rem; }
+    button { cursor: pointer; padding: .75rem 1rem; border: 0; border-radius: .5rem;
+      font: inherit; font-weight: 700; background: #5eead4; color: #101827; }
+    button.secondary { background: #344661; color: white; }
+    button:disabled { opacity: .5; cursor: wait; }
+    #feedback { min-height: 2.5rem; margin-top: 1rem; font-weight: 650; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Binärklockan</h1>
+  <p>Läs av de tända rutorna och skriv klockslaget. Lägg ihop vikterna i varje färggrupp:
+    översta fyra rutorna är timmar, följande sex minuter och sista sex sekunder.</p>
+  <p class="note"><strong>Obs:</strong> Fyra bitar räcker bara till timmarna 00–15.
+    Den här övningen använder därför klockslag mellan 00:00:00 och 15:59:59.
+    En tänd ruta räknas, en släckt ruta är noll.</p>
+  <div class="legend" aria-hidden="true">
+    <span class="hour"><i class="swatch"></i>Timmar</span>
+    <span class="minute"><i class="swatch"></i>Minuter</span>
+    <span class="second"><i class="swatch"></i>Sekunder</span>
+  </div>
+  <div id="bits" class="grid" role="group" aria-label="Binärklocka, 16 bitar i läsordning"></div>
+  <form id="answer">
+    <div class="fields">
+      <label for="hours">Timmar (0–15)<input id="hours" type="number" min="0" max="15" step="1" inputmode="numeric" required></label>
+      <label for="minutes">Minuter (0–59)<input id="minutes" type="number" min="0" max="59" step="1" inputmode="numeric" required></label>
+      <label for="seconds">Sekunder (0–59)<input id="seconds" type="number" min="0" max="59" step="1" inputmode="numeric" required></label>
+    </div>
+    <div class="actions">
+      <button id="check" type="submit" disabled>Kontrollera svaret</button>
+      <button id="next" type="button" class="secondary" disabled>Nytt klockslag</button>
+    </div>
+    <p id="feedback" role="status" aria-live="polite">Laddar klockan…</p>
+  </form>
+</main>
+<script>
+  const fields = ['hours', 'minutes', 'seconds'].map(id => document.getElementById(id));
+  const names = ['timmar', 'minuter', 'sekunder'];
+  const bits = document.getElementById('bits');
+  const feedback = document.getElementById('feedback');
+  const check = document.getElementById('check');
+  const next = document.getElementById('next');
+  const weights = [8, 4, 2, 1, 32, 16, 8, 4, 2, 1, 32, 16, 8, 4, 2, 1];
+
+  function call(name, args = []) {
+    return Module.ccall(name, name === 'clock_new_round' ? null : 'number',
+      args.map(() => 'number'), args);
+  }
+
+  function newRound() {
+    call('clock_new_round');
+    bits.replaceChildren();
+    weights.forEach((weight, index) => {
+      const group = index < 4 ? 0 : index < 10 ? 1 : 2;
+      const on = call('clock_bit', [index]) === 1;
+      const box = document.createElement('div');
+      box.className = `bit ${['hour', 'minute', 'second'][group]}${on ? ' on' : ''}`;
+      box.setAttribute('aria-label', `${names[group]}, vikt ${weight}, ${on ? 'tänd' : 'släckt'}`);
+      box.innerHTML = `<strong aria-hidden="true">${on ? '1' : '0'}</strong><small aria-hidden="true">${weight}</small>`;
+      bits.append(box);
+    });
+    fields.forEach(field => { field.value = ''; field.classList.remove('correct', 'incorrect'); });
+    feedback.textContent = 'Vilket klockslag visar rutorna?';
+    check.disabled = false;
+    fields[0].focus();
+  }
+
+  document.getElementById('answer').addEventListener('submit', event => {
+    event.preventDefault();
+    if (!event.currentTarget.reportValidity()) return;
+    const result = call('clock_check', fields.map(field => Number(field.value)));
+    fields.forEach((field, index) => {
+      const correct = (result & (1 << index)) !== 0;
+      field.classList.toggle('correct', correct);
+      field.classList.toggle('incorrect', !correct);
+    });
+    if (result === 7) {
+      feedback.textContent = 'Helt rätt! Bra jobbat. Prova ett nytt klockslag!';
+      check.disabled = true;
+      next.focus();
+    } else {
+      feedback.textContent = `Rätt: ${names.filter((_, index) => result & (1 << index)).join(', ') || 'ingen ännu'}. Försök igen med de markerade fälten.`;
+    }
+  });
+  fields.forEach(field => field.addEventListener('input', () => field.classList.remove('incorrect', 'correct')));
+  next.addEventListener('click', newRound);
+
+  var Module = {
+    onRuntimeInitialized() { check.disabled = false; next.disabled = false; newRound(); },
+    setStatus(text) { if (text) feedback.textContent = text; },
+    onAbort(reason) { feedback.textContent = `Kunde inte starta klockan: ${reason}`; }
+  };
+</script>
+{{{ SCRIPT }}}
+</body>
+</html>
