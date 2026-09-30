@@ -1,0 +1,49 @@
+name: Publish binary clock
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/emscripten/emsdk:3.1.74
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build WebAssembly site
+        run: |
+          emcmake cmake -S . -B build/pages/cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY="$GITHUB_WORKSPACE/build/pages/site"
+          cmake --build build/pages/cmake --parallel 2
+          touch build/pages/site/.nojekyll
+          test -s build/pages/site/index.html
+          test -s build/pages/site/index.js
+          test -s build/pages/site/index.wasm
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/pages/site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
