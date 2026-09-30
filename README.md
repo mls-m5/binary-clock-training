@@ -28,20 +28,6 @@ Podman kör med ditt användar-ID så att byggfilerna kan tas bort utan root.
 En vanlig lokal CMake-kompilering fungerar också, men övningssidan kräver
 Emscripten.
 
-## Publicera på GitHub Pages
+## Prova online
 
-Workflowen [`.github/workflows/pages.yml`](.github/workflows/pages.yml) bygger
-med Emscripten och publicerar `index.html`, `index.js` och `index.wasm` vid
-push till `main`. Den kan även startas manuellt via **Actions → Publish
-binary clock → Run workflow**. Den publicerar bara byggresultatet, inte CMake:s
-mellanliggande filer.
-
-1. Skapa ett GitHub-repo och pusha projektet till `main` (ändra workflowens
-   `branches` om du använder en annan standardgren).
-2. Välj **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-3. Pusha en ändring eller starta workflowen manuellt. Adressen visas under
-   **Settings → Pages** och i workflowens deploy-steg; för ett vanligt
-   projektrepo är den `https://<användare>.github.io/<repo>/`.
-
-Om organisationen begränsar Actions eller Pages måste de också tillåtas i
-repo-/organisationsinställningarna.
+[Öppna binärklockan på GitHub Pages](https://mls-m5.github.io/binary-clock-training/).
