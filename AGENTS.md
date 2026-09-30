@@ -8,10 +8,13 @@
 - `src/main.cpp` owns random time generation, bit extraction and answer checks.
   Its exported C functions (`clock_new_round`, `clock_bit`, `clock_check`) are
   called by JavaScript in `web/shell.html` via `Module.ccall`. Keep both sides
-  of that interface in sync.
+  of that interface in sync. Keep all user-facing page strings in both English
+  and Swedish; English is the default and language changes must preserve the
+  current round and entered answers.
 - `web/shell.html` is the Emscripten shell: keep `{{{ SCRIPT }}}` in place and
   define `Module` before it. `CMakeLists.txt` configures Emscripten to emit
-  `index.html`, `index.js` and `index.wasm`.
+  `index.html`, `index.js` and `index.wasm`. It tracks changes to the shell
+  through `LINK_DEPENDS`, so editing the page triggers a relink.
 - Run `make podman` to build locally. It uses `Containerfile` and
   `podman/build-wasm.sh` and writes to `build/podman/`. Serve that directory
   over HTTP to test the page, e.g. `python3 -m http.server 8000 --directory

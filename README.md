@@ -1,33 +1,34 @@
-# Binärklockan
+# Binary Clock Training
 
-En övningssida för att läsa en binär klocka. Ett C++-program kompileras med
-Emscripten till WebAssembly och väljer ett slumpmässigt klockslag samt rättar
-svaren. Webbsidan visar 16 bitar i ett 4×4-rutnät: 4 för timmar, 6 för minuter
-och 6 för sekunder. Skriv in tiden i de tre fälten för att få återkoppling per
-del, eller välj ett nytt klockslag.
+An exercise for reading a binary clock. C++ compiled to WebAssembly with
+Emscripten chooses a random time and checks your answer. The page displays
+16 bits in a 4×4 grid: 4 for hours, 6 for minutes, and 6 for seconds. Enter
+the time in the three fields for feedback on each part, or try a new time.
+The page defaults to English; use the 🇬🇧 / 🇸🇪 buttons to switch between
+English and Swedish. Your choice is saved in your browser when local storage
+is available.
 
-**Begränsning:** Fyra bitar kan bara representera 0–15, så övningen använder
-klockslag mellan 00:00:00 och 15:59:59 (inte hela dygnet).
+**Note:** Four bits can only represent hours 0–15, so this exercise uses
+times between 00:00:00 and 15:59:59, not a full 24-hour day.
 
-## Bygg och kör lokalt
+## Build and run locally
 
-Kräver Podman och Make. Emscripten installeras inte lokalt; samma version
-(`3.1.74`) används i Podman och GitHub Actions.
+Requires Podman and Make. Emscripten is not required on your machine: both
+Podman and GitHub Actions use the same pinned version (`3.1.74`).
 
 ```sh
 make podman
 python3 -m http.server 8000 --directory build/podman
 ```
 
-Öppna http://localhost:8000/ i webbläsaren. En webbserver behövs eftersom
-webbläsare inte alltid kan ladda WebAssembly via `file://`.
+Open http://localhost:8000/ in a browser. A local web server is needed
+because browsers may not load WebAssembly over `file://`.
 
-De genererade filerna är `build/podman/index.html`, `index.js` och
-`index.wasm`. CMake:s mellanliggande filer ligger i `build/podman/cmake/`.
-Podman kör med ditt användar-ID så att byggfilerna kan tas bort utan root.
-En vanlig lokal CMake-kompilering fungerar också, men övningssidan kräver
-Emscripten.
+The generated files are `build/podman/index.html`, `index.js`, and
+`index.wasm`. CMake's intermediate files are in `build/podman/cmake/`.
+Podman runs with your user ID so you can delete the build files without root.
+A native CMake build also works, but the exercise page requires Emscripten.
 
-## Prova online
+## Try it online
 
-[Öppna binärklockan på GitHub Pages](https://mls-m5.github.io/binary-clock-training/).
+[Open Binary Clock Training on GitHub Pages](https://mls-m5.github.io/binary-clock-training/).

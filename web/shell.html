@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="sv">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Binärklockan – öva på att läsa bitar</title>
+  <title>Binary Clock Training</title>
   <style>
     :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #101827; color: #f0f5ff; }
     * { box-sizing: border-box; }
@@ -40,43 +40,121 @@
     button.secondary { background: #344661; color: white; }
     button:disabled { opacity: .5; cursor: wait; }
     #feedback { min-height: 2.5rem; margin-top: 1rem; font-weight: 650; }
+    .languages { display: flex; gap: .5rem; justify-content: flex-end; }
+    .languages button { background: #344661; color: white; padding: .45rem .7rem; }
+    .languages button[aria-pressed="true"] { background: #5eead4; color: #101827; }
   </style>
 </head>
 <body>
 <main>
-  <h1>Binärklockan</h1>
-  <p>Läs av de tända rutorna och skriv klockslaget. Lägg ihop vikterna i varje färggrupp:
-    översta fyra rutorna är timmar, följande sex minuter och sista sex sekunder.</p>
-  <p class="note"><strong>Obs:</strong> Fyra bitar räcker bara till timmarna 00–15.
-    Den här övningen använder därför klockslag mellan 00:00:00 och 15:59:59.
-    En tänd ruta räknas, en släckt ruta är noll.</p>
+  <nav class="languages" aria-label="Language" id="languages">
+    <button type="button" data-lang="en" aria-pressed="true">🇬🇧 English</button>
+    <button type="button" data-lang="sv" aria-pressed="false">🇸🇪 Svenska</button>
+  </nav>
+  <h1 data-i18n="heading">Binary Clock Training</h1>
+  <p data-i18n="intro">Read the lit squares and enter the time. Add up the weights in each color group:
+    the first four bits are hours, the next six minutes, and the last six seconds.</p>
+  <p class="note" data-i18n="note">Note: Four bits can only show hours 00–15.
+    This exercise therefore uses times between 00:00:00 and 15:59:59.
+    A lit square counts; an unlit square is zero.</p>
   <div class="legend" aria-hidden="true">
-    <span class="hour"><i class="swatch"></i>Timmar</span>
-    <span class="minute"><i class="swatch"></i>Minuter</span>
-    <span class="second"><i class="swatch"></i>Sekunder</span>
+    <span class="hour"><i class="swatch"></i><span data-i18n="hours">Hours</span></span>
+    <span class="minute"><i class="swatch"></i><span data-i18n="minutes">Minutes</span></span>
+    <span class="second"><i class="swatch"></i><span data-i18n="seconds">Seconds</span></span>
   </div>
-  <div id="bits" class="grid" role="group" aria-label="Binärklocka, 16 bitar i läsordning"></div>
+  <div id="bits" class="grid" role="group" aria-label="Binary clock, 16 bits in reading order"></div>
   <form id="answer">
     <div class="fields">
-      <label for="hours">Timmar (0–15)<input id="hours" type="number" min="0" max="15" step="1" inputmode="numeric" required></label>
-      <label for="minutes">Minuter (0–59)<input id="minutes" type="number" min="0" max="59" step="1" inputmode="numeric" required></label>
-      <label for="seconds">Sekunder (0–59)<input id="seconds" type="number" min="0" max="59" step="1" inputmode="numeric" required></label>
+      <label for="hours"><span data-i18n="hoursLabel">Hours (0–15)</span><input id="hours" type="number" min="0" max="15" step="1" inputmode="numeric" required></label>
+      <label for="minutes"><span data-i18n="minutesLabel">Minutes (0–59)</span><input id="minutes" type="number" min="0" max="59" step="1" inputmode="numeric" required></label>
+      <label for="seconds"><span data-i18n="secondsLabel">Seconds (0–59)</span><input id="seconds" type="number" min="0" max="59" step="1" inputmode="numeric" required></label>
     </div>
     <div class="actions">
-      <button id="check" type="submit" disabled>Kontrollera svaret</button>
-      <button id="next" type="button" class="secondary" disabled>Nytt klockslag</button>
+      <button id="check" type="submit" disabled data-i18n="check">Check answer</button>
+      <button id="next" type="button" class="secondary" disabled data-i18n="next">New time</button>
     </div>
-    <p id="feedback" role="status" aria-live="polite">Laddar klockan…</p>
+    <p id="feedback" role="status" aria-live="polite">Loading clock…</p>
   </form>
 </main>
 <script>
+  const translations = {
+    en: {
+      title: 'Binary Clock Training', heading: 'Binary Clock Training',
+      intro: 'Read the lit squares and enter the time. Add up the weights in each color group: the first four bits are hours, the next six minutes, and the last six seconds.',
+      note: 'Note: Four bits can only show hours 00–15. This exercise therefore uses times between 00:00:00 and 15:59:59. A lit square counts; an unlit square is zero.',
+      hours: 'Hours', minutes: 'Minutes', seconds: 'Seconds',
+      hoursLabel: 'Hours (0–15)', minutesLabel: 'Minutes (0–59)', secondsLabel: 'Seconds (0–59)',
+      check: 'Check answer', next: 'New time', language: 'Language', grid: 'Binary clock, 16 bits in reading order',
+      weight: 'weight', on: 'lit', off: 'unlit', loading: 'Loading clock…',
+      prompt: 'What time do the squares show?', success: 'Exactly right! Great job. Try a new time!',
+      correct: 'Correct', none: 'none yet', retry: 'Try again with the marked fields.',
+      error: 'Could not start the clock'
+    },
+    sv: {
+      title: 'Binärklockan – öva på att läsa bitar', heading: 'Binärklockan',
+      intro: 'Läs av de tända rutorna och skriv klockslaget. Lägg ihop vikterna i varje färggrupp: de första fyra bitarna är timmar, följande sex minuter och sista sex sekunder.',
+      note: 'Obs: Fyra bitar räcker bara till timmarna 00–15. Den här övningen använder därför klockslag mellan 00:00:00 och 15:59:59. En tänd ruta räknas, en släckt ruta är noll.',
+      hours: 'Timmar', minutes: 'Minuter', seconds: 'Sekunder',
+      hoursLabel: 'Timmar (0–15)', minutesLabel: 'Minuter (0–59)', secondsLabel: 'Sekunder (0–59)',
+      check: 'Kontrollera svaret', next: 'Nytt klockslag', language: 'Språk', grid: 'Binärklocka, 16 bitar i läsordning',
+      weight: 'vikt', on: 'tänd', off: 'släckt', loading: 'Laddar klockan…',
+      prompt: 'Vilket klockslag visar rutorna?', success: 'Helt rätt! Bra jobbat. Prova ett nytt klockslag!',
+      correct: 'Rätt', none: 'ingen ännu', retry: 'Försök igen med de markerade fälten.',
+      error: 'Kunde inte starta klockan'
+    }
+  };
   const fields = ['hours', 'minutes', 'seconds'].map(id => document.getElementById(id));
-  const names = ['timmar', 'minuter', 'sekunder'];
   const bits = document.getElementById('bits');
   const feedback = document.getElementById('feedback');
   const check = document.getElementById('check');
   const next = document.getElementById('next');
   const weights = [8, 4, 2, 1, 32, 16, 8, 4, 2, 1, 32, 16, 8, 4, 2, 1];
+  const groups = ['hours', 'minutes', 'seconds'];
+  let language = 'en';
+  let feedbackState = { type: 'loading' };
+
+  function updateFeedback() {
+    const t = translations[language];
+    if (feedbackState.type === 'partial') {
+      const names = groups.filter((_, index) => feedbackState.result & (1 << index)).map(key => t[key]);
+      feedback.textContent = `${t.correct}: ${names.join(', ') || t.none}. ${t.retry}`;
+    } else if (feedbackState.type === 'error') {
+      feedback.textContent = `${t.error}: ${feedbackState.reason}`;
+    } else {
+      feedback.textContent = t[feedbackState.type];
+    }
+  }
+
+  function setFeedback(type, extra = {}) {
+    feedbackState = { type, ...extra };
+    updateFeedback();
+  }
+
+  function applyLanguage(lang) {
+    language = lang;
+    const t = translations[lang];
+    document.documentElement.lang = lang;
+    document.title = t.title;
+    document.querySelectorAll('[data-i18n]').forEach(node => { node.textContent = t[node.dataset.i18n]; });
+    document.getElementById('languages').setAttribute('aria-label', t.language);
+    document.querySelectorAll('[data-lang]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.lang === lang));
+    });
+    bits.setAttribute('aria-label', t.grid);
+    bits.querySelectorAll('.bit').forEach(box => {
+      box.setAttribute('aria-label', `${t[groups[Number(box.dataset.group)]]}, ${t.weight} ${box.dataset.weight}, ${box.dataset.on === 'true' ? t.on : t.off}`);
+    });
+    updateFeedback();
+  }
+
+  document.querySelectorAll('[data-lang]').forEach(button => button.addEventListener('click', () => {
+    applyLanguage(button.dataset.lang);
+    try { localStorage.setItem('clock-language', language); } catch (_) { /* Storage may be disabled. */ }
+  }));
+  try {
+    if (localStorage.getItem('clock-language') === 'sv') language = 'sv';
+  } catch (_) { /* English remains the default. */ }
+  applyLanguage(language);
 
   function call(name, args = []) {
     return Module.ccall(name, name === 'clock_new_round' ? null : 'number',
@@ -91,12 +169,15 @@
       const on = call('clock_bit', [index]) === 1;
       const box = document.createElement('div');
       box.className = `bit ${['hour', 'minute', 'second'][group]}${on ? ' on' : ''}`;
-      box.setAttribute('aria-label', `${names[group]}, vikt ${weight}, ${on ? 'tänd' : 'släckt'}`);
+      box.dataset.group = group;
+      box.dataset.weight = weight;
+      box.dataset.on = on;
       box.innerHTML = `<strong aria-hidden="true">${on ? '1' : '0'}</strong><small aria-hidden="true">${weight}</small>`;
       bits.append(box);
     });
     fields.forEach(field => { field.value = ''; field.classList.remove('correct', 'incorrect'); });
-    feedback.textContent = 'Vilket klockslag visar rutorna?';
+    setFeedback('prompt');
+    applyLanguage(language);
     check.disabled = false;
     fields[0].focus();
   }
@@ -111,20 +192,19 @@
       field.classList.toggle('incorrect', !correct);
     });
     if (result === 7) {
-      feedback.textContent = 'Helt rätt! Bra jobbat. Prova ett nytt klockslag!';
+      setFeedback('success');
       check.disabled = true;
       next.focus();
     } else {
-      feedback.textContent = `Rätt: ${names.filter((_, index) => result & (1 << index)).join(', ') || 'ingen ännu'}. Försök igen med de markerade fälten.`;
+      setFeedback('partial', { result });
     }
   });
   fields.forEach(field => field.addEventListener('input', () => field.classList.remove('incorrect', 'correct')));
   next.addEventListener('click', newRound);
 
   var Module = {
-    onRuntimeInitialized() { check.disabled = false; next.disabled = false; newRound(); },
-    setStatus(text) { if (text) feedback.textContent = text; },
-    onAbort(reason) { feedback.textContent = `Kunde inte starta klockan: ${reason}`; }
+    onRuntimeInitialized() { next.disabled = false; newRound(); },
+    onAbort(reason) { setFeedback('error', { reason }); }
   };
 </script>
 {{{ SCRIPT }}}
