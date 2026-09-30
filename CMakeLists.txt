@@ -8,6 +8,7 @@ add_subdirectory(lib)
 add_executable(
     binary-training
     src/main.cpp
+    src/clock.cpp
     )
 
 target_compile_features(

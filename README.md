@@ -1,8 +1,9 @@
 # Binary Clock Training
 
 An exercise for reading a binary clock. C++ compiled to WebAssembly with
-Emscripten chooses a random time and checks your answer. The page displays
-16 bits in a 4×4 grid: 4 for hours, 6 for minutes, and 6 for seconds. Enter
+Emscripten chooses a random time, generates the bits, checks your answer, and
+produces feedback in English or Swedish. JavaScript handles the browser UI.
+The page displays 16 bits in a 4×4 grid: 4 for hours, 6 for minutes, and 6 for seconds. Enter
 the time in the three fields for feedback on each part, or try a new time.
 The page defaults to English; use the 🇬🇧 / 🇸🇪 buttons to switch between
 English and Swedish. Your choice is saved in your browser when local storage
@@ -28,6 +29,8 @@ The generated files are `build/podman/index.html`, `index.js`, and
 `index.wasm`. CMake's intermediate files are in `build/podman/cmake/`.
 Podman runs with your user ID so you can delete the build files without root.
 A native CMake build also works, but the exercise page requires Emscripten.
+Run the C++ logic tests with `ctest --test-dir <native-build-dir> --output-on-failure`
+after configuring and building a native CMake build.
 
 ## Try it online
 

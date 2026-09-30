@@ -1,0 +1,5 @@
+if(NOT EMSCRIPTEN)
+    add_executable(clock-test clock_test.cpp ../src/clock.cpp)
+    target_compile_features(clock-test PRIVATE cxx_std_17)
+    add_test(NAME clock-test COMMAND clock-test)
+endif()
